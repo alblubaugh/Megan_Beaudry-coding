@@ -3,48 +3,129 @@ title: "Megan_Beaudry Coding exercise"
 output:
   html_document:
     df_print: paged
+    theme: cosmo
 ---
-#*LOADING AND CHECKING DATA*
-#we want to load the dslabs package
-#load the gapminder data set
+
+#*LOADING AND CHECKING DATA* <br>
+#We want to load the dslabs package <br>
+#Also now loading tidyverse and skimr packages <br>
+#Load the gapminder data set <br>
+
 ```{r}
 library(dslabs)
+library(tidyverse)
+library(skimr)
 data("gapminder")
 ```
 
-#use the help() fuctnion to see what the data contains
-##the dataset contains health and incomeoutcomes for 184 coutnies from 1960 to 2016
-#str - displays basic strucutual info. The nine variables of this dataset are: country, year, infant_mortality, life_expectany, fertility, population, gdp, continent, region
-#summary - statistical summaries of selected data. Type of data shown depends on class
+
+#Use the help() function to see what the data contains <br>
 ```{r}
 help(gapminder)
+```
+##The dataset contains health and incomeoutcomes for 184 country from 1960 to 2016 <br>
+
+#str - displays basic strucutual info. <br>
+```{r}
 str(gapminder)
+```
+
+##The nine variables of this dataset are: country, year, infant_mortality, life_expectany, fertility, population, gdp, continent, region <br>
+
+#summary - statistical summaries of selected data. Type of data shown depends on class <br>
+```{r}
 summary(gapminder)
 ```
+
+#glimpse - shows data frame info again (like str structural info) only now in a form easier to read <br>
+```{r}
+glimpse(gapminder)
+```
+
+#skim - shows summary statistics (like summary) only now with brief histograms, details on missing data for each variable, and as much other information as possible in a concise form. <br>
+
+```{r}
+skim(gapminder)
+```
+
 #class - what type of fuction is gapminder
 ```{r}
 class(gapminder)
 ```
 
-#*PROCESSING DATA*
-#using base R notation assing only african countries to the variable africadata
-## <- right of the chosen variable name 
-###all african counties are accessed through the dataset gapminder by using the variable content. The accessor $ is used to access specific variables (i.e., continent)
-####we then pull out the african counties by using a logical vector (i.e., ==) to determine if the variable content is listed as "Africa"
+
+<br>
+<br>
+<br>
+#*PROCESSING DATA* <br>
+#Here the workflow diverges into a Tidyverse Exercise and a base R exercise. Tidyverse exercises are shown first <br>
+
+<br>
+<br>
+<br>
+#*Tidyverse code and plotting* <br>
+#For tidyverse package use, we start a pipeline for gapminder data with %>% ("then") <br>
+#We then filter () the data for only those data whose country is Africa <br>
+#then select() only the variables infant_mortality, life_expectancy, population, and country to remain <br>
+#plotting with country by color reveals many African countries. We also see that 226 rows are omitted from the plot due to missing values<br>
+#We see the same negative correlation between infant mortality and life expectancy here as we do below with base R code <br>
+```{r}
+gapminder %>%
+  filter(continent == "Africa") %>%
+  select(infant_mortality, life_expectancy, population, country) %>%
+  ggplot() + geom_point(aes(infant_mortality, life_expectancy, col= country))
+
+```
+
+#Repeat for plot of population versus life expectancy <br>
+#In this case, 51 omissions occur due to no population variable value <br>
+#Here, we see a similar result with slightly positive trending between these variables as we did in base R code below
+```{r}
+gapminder %>%
+  filter(continent == "Africa") %>%
+  select(infant_mortality, life_expectancy, population, country) %>%
+  ggplot() + geom_point(aes(population, life_expectancy, col= country))
+
+```
+
+#For our final Tidyverse plot using ggplot(), we will pull out only Africa AND year 2000 data for a life_expectancy as a function of infant mortality<br>
+
+#We will plot our points and use the geom_smooth() function with method() set to "lm" (linear model) to show our best fit line. <br>
+
+#The best fit line helps visualize the negative correlation we saw accross all years in African countries in just the year 2000 as well. The shadowed region around the line is the standard error range of the linear model best fit, which is boolean se = TRUE as a default for ggplot.
+
+```{r}
+gapminder %>%
+  filter(continent == "Africa", year == 2000) %>%
+  select(infant_mortality, life_expectancy, population, country) %>%
+  ggplot(aes(infant_mortality, life_expectancy)) + geom_point() +geom_smooth(method = "lm") + labs(title= "Africa in the year 2000: A best fit line for infant mortality versus life expectancy")
+
+```
+
+
+
+<br>
+<br>
+<br>
+#*Base R code with original plots from coding exercise 1*
+
+#For base R,  <- right of the chosen variable name <br>.  All african counties are accessed through the dataset gapminder by using the variable. The accessor $ is used to access specific variables (i.e., continent) within <br>
+#Again in base R, We then pull out the african counties by using a logical vector (i.e., ==) to determine if the variable content is listed as "Africa" <br>
 ```{r}
 africadata <- gapminder$continent == "Africa"
 ```
 
-#str - basic information on the variable
+
+
+#str - basic information on the variable defined above
 #summary - statistical summaries of selected data
 ```{r}
 str(africadata)
 summary(africadata)
 ```
-##the results from this code chunk indicated that we have 2907 arguments that are "true" out of a total of 10545
-###this results in our dataset being dereased to 2908
+##the results from this code chunk indicated that we have 2907 arguments that are "true" out of a total of 10545.  You can see this is the same result as using filter and select in tidyverse. <br>
 
-#Now we want to define two new variables: (1) Infant_LifeExpec_Africa ~ which includes infant_mortality and life_expectency and (2) Pop_LifeExp_Africa ~ includes population and life_expectancy
+#For base R, we want to define two new variables: (1) Infant_LifeExpec_Africa ~ which includes infant_mortality and life_expectency and (2) Pop_LifeExp_Africa ~ includes population and life_expectancy <br>
 
 #First, lets pull out just the infant_mortality data from africa
 #In order to do so, we call the variable infant_mortality_africa
@@ -58,7 +139,7 @@ life_expectency_africa <- gapminder$life_expectancy[africadata]
 ```
 #now we have to seperate variables that we want to combine to make Infant_LifeExpec_Africa
 ##when want to combine two variables we use a dataframe
-#We need to define the pieces of the dataframe by using equal signs followed by the variables we created earlier 
+#We need to define the pieces of the dataframe by using equal signs followed by the variables we created earlier. None of this is necessary with tidyverse.
 ```{r}
 Infant_LifeExpec_Africa <- data.frame(infant_mortality = infant_mortality_africa, life_expectancy = life_expectency_africa)
 ```
